@@ -1,0 +1,32 @@
+pipeline {
+    agent any
+    stages
+    {
+        stage ("Pull") {
+            steps {
+                git 'https://github.com/Mohit-Verma555/sonar.git'
+            }
+        }
+        stage ("build") {
+            steps {
+                sh '/opt/maven/bin/mvn clean package'
+            }
+        }
+        stage ("test")
+        {
+            steps {
+			withSonarQubeEnv(installationName: 'sonar-install', credentialsId: 'sonar-id') {
+                       sh ''' /opt/maven/bin/mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+                      -Dsonar.projectKey=new-pipe \
+                      -Dsonar.projectName='new-pipe' \ '''
+}
+            }
+        }
+        stage ("deploy")
+        {
+            steps {
+                echo 'deployment successfull'
+            }
+        }
+    }
+}
